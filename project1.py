@@ -17,12 +17,14 @@ class Molecule(object):
         self.n_atoms = n_atoms
         self.atoms = atoms
         self.coordinates = coordinates
+        self.bonds = np.zeros((self.n_atoms, self.n_atoms))
+        self.angles = []
+        self.torsions = []
         
     def bond_length(self):
         """
         Calculates the bond length for each bond from the atomic Cartesian coordinates.
         """
-        R = np.zeros((self.n_atoms, self.n_atoms))
         for i in range(self.n_atoms):
             for j in range(i):
                 x_i = self.coordinates[i][0]
@@ -31,8 +33,30 @@ class Molecule(object):
                 x_j = self.coordinates[j][0]
                 y_j = self.coordinates[j][1]
                 z_j = self.coordinates[j][2]
-                R[i, j] = math.sqrt((x_i - x_j)**2 + (y_i - y_j)**2 + (z_i - z_j)**2)
-        return R
+                self.bonds[i, j] = math.sqrt((x_i - x_j)**2 + (y_i - y_j)**2 + (z_i - z_j)**2)
+        return self.bonds
+    
+    def unit_vectors(self):
+        """
+        Calculates the unit vector between each atom pair in the molecule
+        """
+        unit_x = np.zeros((self.n_atoms, self.n_atoms))
+        unit_y = np.zeros((self.n_atoms, self.n_atoms))
+        unit_z = np.zeros((self.n_atoms, self.n_atoms))
+        for i in range(n_atoms):
+            for j in range(i):
+                unit_x[i, j] = -(self.coordinates[i][0] - self.coordinates[j][0]) / self.bonds[i, j]
+                unit_y[i, j] = -(self.coordinates[i][1] - self.coordinates[j][1]) / self.bonds[i, j]
+                unit_z[i, j] = -(self.coordinates[i][2] - self.coordinates[j][2]) / self.bonds[i, j]
+        return unit_x, unit_y, unit_z
+
+    
+    def bond_angle(self):
+        """
+        Calcualtes every bond angle in the molecule.
+        """
+        pass
+        
     
 filename = input("Enter the filename: ")
 
@@ -55,5 +79,6 @@ for line in data[1:]:
     coordinates.append((x, y, z))
 
 new_molecule = Molecule(n_atoms, atoms, coordinates)
-# R = new_molecule.bond_length()
-#print(R[:,1])
+#R = new_molecule.bond_length()
+#print(R[:,0])
+file.close()
